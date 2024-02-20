@@ -1,0 +1,12 @@
+input:not([type]), input[type="text"] {
+  width: 10em;
+}
+
+#input-display-name {
+  width: 20em;
+}
+
+textarea {
+  width: 30em;
+  resize: vertical;
+}
