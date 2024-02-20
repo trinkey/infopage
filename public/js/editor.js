@@ -36,7 +36,7 @@ function add_input(key) {
   let x = document.createElement("div")
 
   let q = [...document.querySelectorAll(`#${key} div[id^="${key}-"]`)];
-  let i = Number(q[q.length - 1].dataset.id) + 1;
+  let i = Number(q[q.length - 1] ? q[q.length - 1].dataset.id : "-1") + 1;
 
   x.id = `${key}-${i}`;
   x.setAttribute("data-id", i);
