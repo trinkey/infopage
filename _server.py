@@ -1,14 +1,17 @@
+CONTENT_DIRECTORY = "./public/"
+SAVING_DIRECTORY = "./save/"
+
+UPGRADE_TO_HTTPS = False
+
 import hashlib
 import shutil
 import flask
 import json
 import os
 
-from flask import request
 from typing import Union, Callable
-
-CONTENT_DIRECTORY = "./public/"
-SAVING_DIRECTORY = "./save/"
+from flask import request, redirect
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 app = flask.Flask(__name__)
 
@@ -310,6 +313,15 @@ app.route("/api/account/signup", methods=["POST"])(api_account_signup)
 app.route("/api/account/info/<path:user>", methods=["GET"])(api_account_info_)
 app.route("/api/account/self", methods=["GET"])(api_account_self)
 app.route("/api/save", methods=["PATCH"])(api_save)
+
+if UPGRADE_TO_HTTPS:
+    app.wsgi_app = ProxyFix(app.wsgi_app)
+
+    @app.before_request
+    def enforce_https():
+        if not request.is_secure:
+            url = request.url.replace('http://', 'https://', 1)
+            return redirect(url, code=301)
 
 if __name__ == "__main__":
     app.run(debug=True, port=8080)
