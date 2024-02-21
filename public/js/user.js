@@ -2,8 +2,8 @@ function addToOutput(starting, json, key, title) {
   starting += `<div class="added" id='${key}'><h2>${title}</h2>`;
   for (let i = 0; i < json[key].length; i++) {
     starting += `<div ${
-      json[key][i][1] === 4 ? "class='accent'" :
-      json[key][i][1] === 1 ? "style='color: var(--text-low-opacity);'" : ""
+      json[key][i][1] === "4" ? "class='accent'" :
+      json[key][i][1] === "1" ? "style='color: var(--text-low-opacity);'" : ""
     }>${icons[json[key][i][1]]} ${escapeHTML(json[key][i][0])}</div>`;
   }
   starting += "</div>";
