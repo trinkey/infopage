@@ -118,7 +118,7 @@ def api_account_login():
 def api_account_signup():
     try:
         x = json.loads(request.data)
-        username = x["username"].replace(" ", "")
+        username = x["username"].replace(" ", "").lower()
         passhash = x["password"]
     except json.JSONDecodeError:
         flask.abort(400)
@@ -163,7 +163,7 @@ def api_account_signup():
             "background": "#111122"
         },
         "names": [
-            [username, "4"]
+            [x["username"], "4"]
         ],
         "pronouns": [
             ["he/him", "3"],
@@ -292,12 +292,6 @@ def api_save():
 
 def u_(username):
     return flask.send_file(f"{CONTENT_DIRECTORY}user.html")
-
-# levels:
-# 4 - love
-# 3 - good
-# 2 - okay
-# 1 - bad
 
 ensure_file(SAVING_DIRECTORY, folder=True)
 ensure_file(f"{SAVING_DIRECTORY}tokens/", folder=True)
