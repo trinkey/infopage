@@ -8,3 +8,5 @@ it's like pronouns.page but i made it
 * sexuality/gender flags
 * 404 page
 * embed meta tags
+* short url redir
+* make displ name default to `x["username"]`
