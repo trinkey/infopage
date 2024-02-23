@@ -15,6 +15,16 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 
 app = flask.Flask(__name__)
 
+def validate_color(color: str) -> bool:
+    if len(color) != 7 or color[0] != "#":
+        return False
+
+    for i in color[1::]:
+        if i not in "abcdef0123456789":
+            return False
+
+    return True
+
 def sort_list(l: list[list[str]]) -> list[list[str]]:
     output = []
     for i in l:
@@ -128,7 +138,7 @@ def api_account_signup():
     except KeyError:
         flask.abort(400)
 
-    if len(username) > 24 or len(username) < 1:
+    if len(x["username"]) > 24 or len(x["username"]) < 1:
         flask.abort(400)
 
     if len(passhash) != 64:
@@ -158,7 +168,7 @@ def api_account_signup():
     ensure_file(f"{SAVING_DIRECTORY}tokens/{token}.txt", default_value=username)
     ensure_file(f"{SAVING_DIRECTORY}{username}.json", default_value=json.dumps({
         "username": username,
-        "display_name": username,
+        "display_name": x["username"],
         "description": "",
         "colors": {
             "accent": "#ff0000",
@@ -192,7 +202,8 @@ def api_account_signup():
             ["hot", "3"],
             ["pretty", "3"],
             ["sexy", "3"]
-        ], "relationship": [
+        ],
+        "relationship": [
             ["beloved", "3"],
             ["boyfriend", "3"],
             ["darling", "3"],
@@ -243,13 +254,13 @@ def api_save():
         user_data["description"] = x["description"]
 
     if "colors" in x:
-        if "accent" in x["colors"]:
+        if "accent" in x["colors"] and validate_color(x["colors"]["accent"]):
             user_data["colors"]["accent"] = x["colors"]["accent"]
 
-        if "background" in x["colors"]:
+        if "background" in x["colors"] and validate_color(x["colors"]["background"]):
             user_data["colors"]["background"] = x["colors"]["background"]
 
-        if "text" in x["colors"]:
+        if "text" in x["colors"] and validate_color(x["colors"]["text"]):
             user_data["colors"]["text"] = x["colors"]["text"]
 
     if "names" in x:

@@ -88,7 +88,9 @@ fetch("/api/account/self", {
       <div>Text color: <input id="input-col-text" type="color" value="${colors.text}"></div>
       <div>Background color: <input id="input-col-background" type="color" value="${colors.background}"></div>
       <div>Accent color: <input id="input-col-accent" type="color" value="${colors.accent}"></div><br>
-      <a target="_blank" href="/u/${json.username}"><button>Preview</button></a> <button id="save">Save</button><div id="log"> </div>
+      <a target="_blank" href="/u/${json.username}"><button>Preview</button></a>
+      <button onclick="navigator.clipboard.writeText('https://infopg.web.app/u/trinkey'); log('Copied!');">Share</button>
+      <button id="save">Save</button><div id="log"> </div>
       <div id="word-container">
     `;
 

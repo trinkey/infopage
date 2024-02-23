@@ -12,7 +12,7 @@ function addToOutput(starting, json, key, title) {
 
 let x2 = window.location.href.split("?")[0].split("/");
 
-fetch("/api/account/info/" + x2[x2.length - 1], {
+fetch("/api/account/info/" + x2[x2.length - 1].toLowerCase(), {
   "method": "GET"
 }).then((response) => (response.json()))
   .then((json) => {
