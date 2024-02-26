@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <title>Browse - InfoPage</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <link rel="stylesheet" href="/css/base.css">
+    <link rel="stylesheet" href="/css/browse.css">
+    <script src="/js/base.js"></script>
+  </head>
+
+  <body>
+    <h1>Browse</h1>
+    <a href="/home">Return home</a><br><br>
+    <button onclick="load(true)">Refresh</button>
+    <div id="middle"></div>
+    <button hidden id="more" onclick="load(false)">Load more...</button>
+
+    <script>
+      let next = 0;
+
+      function load(fromStart) {
+        if (fromStart) { next = 0; }
+        fetch(`/api/browse?sort=alphabetical&page=${next}`, {
+          "method": "GET"
+        }).then((request) => (request.json()))
+          .then((json) => {
+            if (json.end) {
+              dom("more").setAttribute("hidden", "");
+            } else {
+              dom("more").removeAttribute("hidden");
+            }
+
+            output = "";
+            for (const profile of json.list) {
+              output += `
+              <div style="--text: ${profile.colors.text}; --background: ${profile.colors.background}; --accent: ${profile.colors.accent};">
+                <div onclick="window.location.href = '/u/${profile.username}'" class="user-entry">
+                  <p>${escapeHTML(profile.display_name)} (@${profile.username})</p>
+                  ${escapeHTML(profile.bio)}
+                </div>
+              </div>`;
+            }
+
+            dom("middle").innerHTML = output;
+          });
+      }
+
+      load();
+    </script>
+  </body>
+</html>

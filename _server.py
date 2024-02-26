@@ -4,6 +4,7 @@ SAVING_DIRECTORY = "./save/"
 UPGRADE_TO_HTTPS = False
 
 import hashlib
+import random
 import shutil
 import flask
 import json
@@ -14,6 +15,7 @@ from flask import request, redirect
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 app = flask.Flask(__name__)
+app.url_map.strict_slashes = False
 
 def validate_color(color: str) -> bool:
     if len(color) != 7 or color[0] != "#":
@@ -64,15 +66,54 @@ def ensure_file(path: str, *, default_value: str="", folder: bool=False) -> None
             f.close()
 
 def escape_html(string: str) -> str:
-    return string.replace("&", "&amp;").replace("<", "&lt;").replace("\"", "&quo;")
-
-def create_file_serve(file) -> Callable:
-    x = lambda: flask.send_file(f"{CONTENT_DIRECTORY}{file}")
-    x.__name__ = file
-    return x
+    return string.replace("&", "&amp;").replace("<", "&lt;").replace("\"", "&quot;")
 
 def generate_token(username: str, passhash: str) -> str:
     return sha(sha(f"{username}:{passhash}") + "among us in real life, sus, sus")
+
+def list_public(
+    sort: str="alphabetical",
+    page: int=0,
+    limit: int=25
+) -> dict:
+    # Sort: "alphabetical", "random"
+    # Page: for "alphabetical", page for next. 0 is first page, 1 is second...
+
+    x = json.loads(open(f"{SAVING_DIRECTORY}public/list.json", "r").read())
+    output = {
+        "end": True,
+        "list": []
+    }
+
+    if sort == "alphabetical":
+        x = x[limit * page::]
+        output["end"] = len(x) <= limit
+        for i in x[:limit:]:
+            q = json.loads(open(f"{SAVING_DIRECTORY}{i}.json", "r").read())
+            output["list"].append({
+                "colors": q["colors"],
+                "display_name": q["display_name"],
+                "bio": q["description"],
+                "username": i
+            })
+
+    elif sort == "random":
+        random.shuffle(x)
+        for i in x[:limit:]:
+            q = json.loads(open(f"{SAVING_DIRECTORY}{i}.json", "r").read())
+            output["list"].append({
+                "colors": q["colors"],
+                "display_name": q["display_name"],
+                "bio": q["description"],
+                "username": i
+            })
+
+    return output
+
+def create_file_serve(file) -> Callable:
+    x = lambda property=None: flask.send_file(f"{CONTENT_DIRECTORY}{file}")
+    x.__name__ = file
+    return x
 
 def create_folder_serve(directory) -> Callable:
     x = lambda file: flask.send_from_directory(f"{CONTENT_DIRECTORY}{directory}", file)
@@ -138,7 +179,7 @@ def api_account_signup():
     except KeyError:
         flask.abort(400)
 
-    if len(x["username"]) > 24 or len(x["username"]) < 1:
+    if len(x["username"]) > 24 or len(username) < 1:
         flask.abort(400)
 
     if len(passhash) != 64:
@@ -240,8 +281,6 @@ def api_account_self():
         flask.abort(404)
 
 def api_save():
-    # TODO - ADD SORTING
-
     username = open(f'{SAVING_DIRECTORY}tokens/{request.cookies["token"]}.txt', 'r').read()
     x = json.loads(request.data)
 
@@ -252,6 +291,19 @@ def api_save():
 
     if "description" in x and len(x["description"]) < 512:
         user_data["description"] = x["description"]
+
+    if "public" in x:
+        user_data["public"] = bool(x["public"])
+        public_list = json.loads(open(f"{SAVING_DIRECTORY}public/list.json", "r").read())
+
+        if user_data["public"] and username not in public_list:
+            public_list.append(username)
+        elif not user_data["public"] and username in public_list:
+            public_list.remove(username)
+
+        f = open(f"{SAVING_DIRECTORY}public/list.json", "w")
+        f.write(json.dumps(sorted(public_list)))
+        f.close()
 
     if "colors" in x:
         if "accent" in x["colors"] and validate_color(x["colors"]["accent"]):
@@ -304,18 +356,54 @@ def api_save():
 
     return "200 OK"
 
-def u_(username):
-    return flask.send_file(f"{CONTENT_DIRECTORY}user.html")
+def api_browse():
+    return return_dynamic_content_type(
+        json.dumps(list_public(request.args.get("sort"), int(request.args.get("page")) if "page" in request.args else 0)),
+        "application/json"
+    )
+
+def home():
+    if "token" not in request.cookies:
+        return flask.send_file(f"{CONTENT_DIRECTORY}home.html")
+
+    token = request.cookies['token']
+
+    if len(token) != 64:
+        return flask.send_file(f"{CONTENT_DIRECTORY}home.html")
+
+    for i in token:
+        if i not in "abcdef0123456789":
+            return flask.send_file(f"{CONTENT_DIRECTORY}home.html")
+
+    try:
+        username = open(f"{SAVING_DIRECTORY}tokens/{token}.txt", "r").read()
+        user_info = json.loads(open(f"{SAVING_DIRECTORY}{username}.json", "r").read())
+    except FileNotFoundError:
+        return flask.send_file(f"{CONTENT_DIRECTORY}home.html")
+
+    x = open(f"{CONTENT_DIRECTORY}home.html", "r").read()
+    x = x.replace("{{USERNAME}}", username)
+    x = x.replace("{{DISPL_NAME}}", user_info["display_name"])
+    x = x.replace("{{PUBLIC}}", "true" if "public" in user_info and user_info["public"] else "false")
+    x = x.replace("{{TOTAL}}", str(len(json.loads(open(f"{SAVING_DIRECTORY}public/list.json", "r").read()))))
+
+    return return_dynamic_content_type(x, "text/html")
 
 ensure_file(SAVING_DIRECTORY, folder=True)
 ensure_file(f"{SAVING_DIRECTORY}tokens/", folder=True)
+ensure_file(f"{SAVING_DIRECTORY}public", folder=True)
+ensure_file(f"{SAVING_DIRECTORY}public/list.json", default_value="[]")
 
 app.route("/")(create_file_serve("index.html"))
 app.route("/login")(create_file_serve("login.html"))
 app.route("/signup")(create_file_serve("signup.html"))
 app.route("/logout")(create_file_serve("logout.html"))
+app.route("/browse")(create_file_serve("browse.html"))
+
 app.route("/editor")(create_file_serve("editor.html"))
-app.route("/u/<path:username>")(u_)
+app.route("/u/<path:property>")(create_file_serve("user.html"))
+app.route("/home")(home)
+
 app.route("/js/<path:file>")(create_folder_serve("js"))
 app.route("/css/<path:file>")(create_folder_serve("css"))
 
@@ -324,6 +412,9 @@ app.route("/api/account/signup", methods=["POST"])(api_account_signup)
 app.route("/api/account/info/<path:user>", methods=["GET"])(api_account_info_)
 app.route("/api/account/self", methods=["GET"])(api_account_self)
 app.route("/api/save", methods=["PATCH"])(api_save)
+app.route("/api/browse", methods=["GET"])(api_browse)
+
+app.errorhandler(404)(create_file_serve("404.html"))
 
 if UPGRADE_TO_HTTPS:
     app.wsgi_app = ProxyFix(app.wsgi_app)

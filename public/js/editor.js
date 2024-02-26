@@ -55,7 +55,7 @@ function add_input(key) {
 }
 
 function updateColors() {
-  document.body.setAttribute("style", `--background: ${colors.background}; --background-low-opacity: ${colors.background}33; --accent: ${colors.accent}; --accent-low-opacity: ${colors.accent}66; --text: ${colors.text}; --text-low-opacity: ${colors.text}88;`);
+  document.body.setAttribute("style", `--primary: ${colors.text}; --secondary-low-opacity: ${colors.text}22; --background: ${colors.background}; --background-low-opacity: ${colors.background}33; --accent: ${colors.accent}; --accent-low-opacity: ${colors.accent}66; --text: ${colors.text}; --text-low-opacity: ${colors.text}88;`);
 }
 
 function get_list(key) {
@@ -87,7 +87,9 @@ fetch("/api/account/self", {
       <div><textarea maxlength="512" placeholder="About me..." id="input-description">${escapeHTML(json.description)}</textarea></div>
       <div>Text color: <input id="input-col-text" type="color" value="${colors.text}"></div>
       <div>Background color: <input id="input-col-background" type="color" value="${colors.background}"></div>
-      <div>Accent color: <input id="input-col-accent" type="color" value="${colors.accent}"></div><br>
+      <div>Accent color: <input id="input-col-accent" type="color" value="${colors.accent}"></div>
+      <div>Public: <input id="public" type="checkbox" ${json.public ? "checked" : ""}></div><br>
+      <a target="_blank" href="/home"><button>Home</button></a>
       <a target="_blank" href="/u/${json.username}"><button>Preview</button></a>
       <button onclick="navigator.clipboard.writeText('https://infopg.web.app/u/trinkey'); log('Copied!');">Share</button>
       <button id="save">Save</button><div id="log"> </div>
@@ -126,7 +128,8 @@ fetch("/api/account/self", {
           pronouns: get_list("pronouns"),
           honorifics: get_list("honorifics"),
           compliments: get_list("compliments"),
-          relationship: get_list("relationship")
+          relationship: get_list("relationship"),
+          public: dom("public").checked
         })
       }).then((response) => (response.text()))
         .then((text) => {

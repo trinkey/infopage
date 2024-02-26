@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <title>Home - InfoPage</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <link rel="stylesheet" href="/css/base.css">
+    <link rel="stylesheet" href="/css/home.css">
+    <script src="/js/base.js"></script>
+
+    <script>
+      if (localStorage.getItem("token")) {
+        setCookie("token", localStorage.getItem("token"));
+      } else {
+        window.location.href = "/logout";
+      }
+
+      let public = eval("{{PUBLIC}}");
+    </script>
+  </head>
+
+  <body>
+    <h1>Welcome, {{DISPL_NAME}}!</h1>
+    <div onclick="window.location.href = '/editor'" class="home-container">
+      <p>Edit your profile</p>
+      {{DISPL_NAME}} (@{{USERNAME}})<br>
+    </div>
+    <br>
+    <div onclick="toggleVisibility()" class="home-container">
+      <p>Toggle visibility</p>
+      Visibility: <span id="public-thing"></span>Public
+    </div>
+    <br>
+    <div onclick="window.location.href = '/browse'" class="home-container">
+      <p>Browse other profiles</p>
+      Total public profiles: <span id="total">{{TOTAL}}</span>
+    </div>
+    <br>
+    <div onclick="window.location.href = '/u/{{USERNAME}}'" class="home-container">
+      <p>Preview your profile</p>
+      Shortened url:<br>
+      https://infopg.web.app/u/{{USERNAME}}
+    </div>
+
+    <script>
+      dom("public-thing").innerText = public ? "" : "Not "
+
+      function toggleVisibility() {
+        public = !public;
+        dom("public-thing").innerText = public ? "" : "Not ";
+        dom("total").innerText = +dom("total").innerText + (public ? 1 : -1);
+
+        fetch( "/api/save", {
+          "method": "PATCH",
+          "body": JSON.stringify({
+            "public": public
+          })
+        });
+      }
+    </script>
+  </body>
+</html>

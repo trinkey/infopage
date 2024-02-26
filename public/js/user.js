@@ -39,5 +39,6 @@ fetch("/api/account/info/" + x2[x2.length - 1].toLowerCase(), {
     document.body.append(x);
   })
   .catch((err) => {
+    document.title = "User not found - InfoPage"
     document.body.innerHTML = "<h1>User not found!</h1><a href=\"/signup\">Sign up</a> - <a href=\"/login\">Log in</a>";
   });
