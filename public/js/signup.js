@@ -38,7 +38,7 @@ dom("submit").addEventListener("click", function() {
           if (json.valid) {
             setCookie("token", json.token);
             localStorage.setItem("token", json.token);
-            window.location.href = "/editor";
+            window.location.href = "/home";
           } else {
             dom("submit").removeAttribute("disabled");
             showlog(`Unable to create account! Reason: ${json.reason}`);
