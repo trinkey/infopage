@@ -22,28 +22,37 @@
 
   <body>
     <h1>Welcome, {{DISPL_NAME}}!</h1>
-    <div onclick="window.location.href = '/editor'" class="home-container">
+    <div tabindex="1" onclick="window.location.href = '/editor'" class="home-container">
       <p>Edit your profile</p>
       {{DISPL_NAME}} (@{{USERNAME}})<br>
     </div>
     <br>
-    <div onclick="toggleVisibility()" class="home-container">
+    <div tabindex="2" onclick="toggleVisibility()" class="home-container">
       <p>Toggle visibility</p>
       Visibility: <span id="public-thing"></span>Public
     </div>
     <br>
-    <div onclick="window.location.href = '/browse'" class="home-container">
+    <div tabindex="3" onclick="window.location.href = '/browse'" class="home-container">
       <p>Browse other profiles</p>
       Total public profiles: <span id="total">{{TOTAL}}</span>
     </div>
     <br>
-    <div onclick="window.location.href = '/u/{{USERNAME}}'" class="home-container">
+    <div tabindex="4" onclick="window.location.href = '/u/{{USERNAME}}'" class="home-container">
       <p>Preview your profile</p>
       Shortened url:<br>
       https://infopg.web.app/u/{{USERNAME}}
     </div>
 
     <script>
+      [...document.querySelectorAll("[onclick][tabindex]")].forEach(function(val, index) {
+        val.addEventListener("keyup", function(event) {
+          event.preventDefault();
+          if (event.keyCode === 13 || event.keyCode === 32) {
+            val.click();
+          }
+        });
+      })
+
       dom("public-thing").innerText = public ? "" : "Not "
 
       function toggleVisibility() {
