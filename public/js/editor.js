@@ -89,7 +89,7 @@ fetch("/api/account/self", {
       <div>Background color: <input id="input-col-background" type="color" value="${colors.background}"></div>
       <div>Accent color: <input id="input-col-accent" type="color" value="${colors.accent}"></div>
       <div>Public: <input id="public" type="checkbox" ${json.public ? "checked" : ""}></div><br>
-      <a target="_blank" href="/home"><button>Home</button></a>
+      <a href="/home"><button>Home</button></a>
       <a target="_blank" href="/u/${json.username}"><button>Preview</button></a>
       <button onclick="navigator.clipboard.writeText('https://infopg.web.app/u/trinkey'); log('Copied!');">Share</button>
       <button id="save">Save</button><div id="log"> </div>
