@@ -10,6 +10,7 @@ import flask
 import json
 import os
 
+from DotIndex import DotIndex
 from typing import Union, Callable
 from flask import request, redirect
 from werkzeug.middleware.proxy_fix import ProxyFix
@@ -119,6 +120,48 @@ def create_folder_serve(directory) -> Callable:
     x = lambda file: flask.send_from_directory(f"{CONTENT_DIRECTORY}{directory}", file)
     x.__name__ = directory
     return x
+
+def get_template(json, username):
+    def add_to_output(starting, json, key, title):
+        starting += f'<div class="added" id="{key}"><h2>{title}</h2>'
+        for i in json[key]:
+            starting += f"""<div {'class="accent"' if i[1] == '4' else 'style="color: var(--text-low-opacity);"' if i[1] == '1' else ''}>{icons[i[1]]} {escape_html(i[0])}</div>"""
+        return starting + "</div>"
+
+    json = DotIndex(json)
+
+    icons = {
+        "1": '<svg style="fill: var(--text-low-opacity);" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M323.8 477.2c-38.2 10.9-78.1-11.2-89-49.4l-5.7-20c-3.7-13-10.4-25-19.5-35l-51.3-56.4c-8.9-9.8-8.2-25 1.6-33.9s25-8.2 33.9 1.6l51.3 56.4c14.1 15.5 24.4 34 30.1 54.1l5.7 20c3.6 12.7 16.9 20.1 29.7 16.5s20.1-16.9 16.5-29.7l-5.7-20c-5.7-19.9-14.7-38.7-26.6-55.5-5.2-7.3-5.8-16.9-1.7-24.9s12.3-13 21.3-13H448c8.8 0 16-7.2 16-16 0-6.8-4.3-12.7-10.4-15-7.4-2.8-13-9-14.9-16.7s.1-15.8 5.3-21.7c2.5-2.8 4-6.5 4-10.6 0-7.8-5.6-14.3-13-15.7-8.2-1.6-15.1-7.3-18-15.2s-1.6-16.7 3.6-23.3c2.1-2.7 3.4-6.1 3.4-9.9 0-6.7-4.2-12.6-10.2-14.9-11.5-4.5-17.7-16.9-14.4-28.8.4-1.3.6-2.8.6-4.3 0-8.8-7.2-16-16-16h-97.5c-12.6 0-25 3.7-35.5 10.7l-61.7 41.1c-11 7.4-25.9 4.4-33.3-6.7s-4.4-25.9 6.7-33.3l61.7-41.1c18.4-12.3 40-18.8 62.1-18.8H384c34.7 0 62.9 27.6 64 62 14.6 11.7 24 29.7 24 50 0 4.5-.5 8.8-1.3 13 15.4 11.7 25.3 30.2 25.3 51 0 6.5-1 12.8-2.8 18.7 11.6 11.8 18.8 27.8 18.8 45.5 0 35.3-28.6 64-64 64h-92.3c4.7 10.4 8.7 21.2 11.8 32.2l5.7 20c10.9 38.2-11.2 78.1-49.4 89zM32 384c-17.7 0-32-14.3-32-32V128c0-17.7 14.3-32 32-32h64c17.7 0 32 14.3 32 32v224c0 17.7-14.3 32-32 32H32z"/></svg>',
+        "2": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M100.5 176c-29 0-52.5 23.5-52.5 52.5V320c0 13.3-10.7 24-24 24S0 333.3 0 320v-91.5C0 173 45 128 100.5 128c29.6 0 57.6 13 76.7 35.6l130.2 153.8c10 11.8 24.6 18.6 40.1 18.6 29 0 52.5-23.5 52.5-52.5V192c0-13.3 10.7-24 24-24s24 10.7 24 24v91.5C448 339 403 384 347.5 384c-29.6 0-57.6-13-76.7-35.6L140.6 194.6c-10-11.8-24.6-18.6-40.1-18.6z"/></svg>',
+        "3": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M323.8 34.8c-38.2-10.9-78.1 11.2-89 49.4l-5.7 20c-3.7 13-10.4 25-19.5 35l-51.3 56.4c-8.9 9.8-8.2 25 1.6 33.9s25 8.2 33.9-1.6l51.3-56.4c14.1-15.5 24.4-34 30.1-54.1l5.7-20c3.6-12.7 16.9-20.1 29.7-16.5s20.1 16.9 16.5 29.7l-5.7 20c-5.7 19.9-14.7 38.7-26.6 55.5-5.2 7.3-5.8 16.9-1.7 24.9s12.3 13 21.3 13H448c8.8 0 16 7.2 16 16 0 6.8-4.3 12.7-10.4 15-7.4 2.8-13 9-14.9 16.7s.1 15.8 5.3 21.7c2.5 2.8 4 6.5 4 10.6 0 7.8-5.6 14.3-13 15.7-8.2 1.6-15.1 7.3-18 15.2s-1.6 16.7 3.6 23.3c2.1 2.7 3.4 6.1 3.4 9.9 0 6.7-4.2 12.6-10.2 14.9-11.5 4.5-17.7 16.9-14.4 28.8.4 1.3.6 2.8.6 4.3 0 8.8-7.2 16-16 16h-97.5c-12.6 0-25-3.7-35.5-10.7l-61.7-41.1c-11-7.4-25.9-4.4-33.3 6.7s-4.4 25.9 6.7 33.3l61.7 41.1c18.4 12.3 40 18.8 62.1 18.8H384c34.7 0 62.9-27.6 64-62 14.6-11.7 24-29.7 24-50 0-4.5-.5-8.8-1.3-13 15.4-11.7 25.3-30.2 25.3-51 0-6.5-1-12.8-2.8-18.7 11.6-11.8 18.8-27.8 18.8-45.5 0-35.3-28.6-64-64-64h-92.3c4.7-10.4 8.7-21.2 11.8-32.2l5.7-20c10.9-38.2-11.2-78.1-49.4-89zM32 192c-17.7 0-32 14.3-32 32v224c0 17.7 14.3 32 32 32h64c17.7 0 32-14.3 32-32V224c0-17.7-14.3-32-32-32H32z"/></svg>',
+        "4": '<svg class="accent" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="m47.6 300.4 180.7 168.7c7.5 7 17.4 10.9 27.7 10.9s20.2-3.9 27.7-10.9l180.7-168.7c30.4-28.3 47.6-68 47.6-109.5v-5.8c0-69.9-50.5-129.5-119.4-141-45.6-7.6-92 7.3-124.6 39.9l-12 12-1-12c-32.6-32.6-79-47.5-124.6-39.9C50.5 55.6 0 115.2 0 185.1v5.8c0 41.5 17.2 81.2 47.6 109.5z"/></svg>'
+    }
+
+    styles = f"--background: {json.colors.background}; --background-low-opacity: {json.colors.background}33; --accent: {json.colors.accent}; --accent-low-opacity: {json.colors.accent}66; --text: {json.colors.text}; --text-low-opacity: {json.colors.text}88;" # type: ignore
+    title = f"{escape_html(json.display_name)} (@{username})".replace("{{TEMPLATE}}", "HA" * 50) # type: ignore
+    embed = f'<meta name="description" content="{json.display_name} on InfoPage"><meta name="author" content="trinkey"><meta property="og:type" content="website"><meta property="og:title" content="{json.display_name} on InfoPage"><meta property="og:description" content="{json.description}"><meta property="og:url" content="https://infopg.web.app/"><meta property="og:site_name" content="infopg.web.app"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="{json.display_name} on InfoPage"><meta name="twitter:description" content="{json.description}">' # type: ignore
+    inner = f'<div id="container"><h1 id="name">{escape_html(json.display_name)}</h1><div id="description">{escape_html(json.description)}</div><div id="word-container">' # type: ignore
+
+    inner = add_to_output(inner, json, "names", "Names");
+    inner = add_to_output(inner, json, "pronouns", "Pronouns");
+    inner = add_to_output(inner, json, "honorifics", "Honorifics");
+    inner = add_to_output(inner, json, "compliments", "Compliments");
+    inner = add_to_output(inner, json, "relationship", "Relationship<br>Descriptions");
+
+    inner += "</div>"
+
+    return title, inner, styles, embed
+
+def get_user_page(user):
+    x = open(f"{CONTENT_DIRECTORY}user.html", "r").read()
+    try:
+        user_json = json.loads(open(f"{SAVING_DIRECTORY}{user}.json", "r").read())
+    except FileNotFoundError:
+        return x.replace("{{TEMPLATE}}", '<h1>User not found!</h1><a href="/signup">Sign up</a> - <a href="/login">Log in</a>').replace("{{TITLE}}", "User not found - InfoPage")
+
+    title, inner, styles, embed = get_template(user_json, user)
+
+    return x.replace("<body", f'<body style="{styles}"').replace("{{TITLE}}", title).replace("<title", embed + "<title", 1).replace("{{TEMPLATE}}", inner).replace("HA" * 50, "{{TEMPLATE}}")
 
 def api_account_login():
     try:
@@ -436,7 +479,7 @@ app.route("/browse")(create_file_serve("browse.html"))
 app.route("/settings")(create_file_serve("settings.html"))
 
 app.route("/editor")(create_file_serve("editor.html"))
-app.route("/u/<path:property>")(create_file_serve("user.html"))
+app.route("/u/<path:user>")(get_user_page)
 app.route("/home")(home)
 
 app.route("/js/<path:file>")(create_folder_serve("js"))
