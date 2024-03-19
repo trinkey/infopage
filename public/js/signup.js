@@ -29,22 +29,16 @@ dom("submit").addEventListener("click", function() {
     })
   })
     .then((response) => {
-      if (response.status == 429) {
-        dom("post").removeAttribute("disabled");
-        dom("post-text").removeAttribute("disabled");
-        showlog("You are being ratelimited! Try again in a few moments...");
-      } else {
-        response.json().then((json) => {
-          if (json.valid) {
-            setCookie("token", json.token);
-            localStorage.setItem("token", json.token);
-            window.location.href = "/home";
-          } else {
-            dom("submit").removeAttribute("disabled");
-            showlog(`Unable to create account! Reason: ${json.reason}`);
-          }
-        })
-      }
+      response.json().then((json) => {
+        if (json.valid) {
+          setCookie("token", json.token);
+          localStorage.setItem("token", json.token);
+          window.location.href = "/home";
+        } else {
+          dom("submit").removeAttribute("disabled");
+          showlog(`Unable to create account! Reason: ${json.reason}`);
+        }
+      })
     })
     .catch((err) => {
       dom("submit").removeAttribute("disabled");

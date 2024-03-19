@@ -1,7 +1,7 @@
 .home-container {
   width: 20em;
   padding: 10px 0;
-  margin: 0 auto;
+  margin: 10px auto;
   border: 2px var(--secondary) solid;
   padding: 6px;
   border-radius: 4px;

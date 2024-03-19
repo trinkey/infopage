@@ -5,4 +5,4 @@ it's like pronouns.page but i made it
 
 ### todo
 * social links
-* sexuality/gender flags
+* templating and embeds on /u/... pages

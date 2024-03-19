@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <title>Home - InfoPage</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <link rel="stylesheet" href="/css/base.css">
+    <script src="/js/base.js"></script>
+
+    <script>
+      if (localStorage.getItem("token")) {
+        setCookie("token", localStorage.getItem("token"));
+      } else {
+        window.location.href = "/logout";
+      }
+    </script>
+  </head>
+
+  <body>
+    <h1>Settings</h1>
+    <h2>Password change</h2>
+    <input id="current" type="password" placeholder="Current password..."><br>
+    <input id="new" type="password" placeholder="New password..."><br>
+    <input id="verify" type="password" placeholder="Verify password..."><br>
+    <button id="submit">Submit</button>
+
+    <p id="log"></p>
+
+    <h2>Delete account</h2>
+    <button id="delete">Delete account</button><br><br>
+
+    <a href="/home">Return home</a>
+
+    <script src="/js/settings.js"></script>
+  </body>
+</html>

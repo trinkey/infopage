@@ -135,39 +135,39 @@ def api_account_login():
 
     for i in username:
         if i not in "abcdefghijklmnopqrstuvwxyz0123456789_-":
-            return return_dynamic_content_type(json.dumps({
+            return {
                 "valid": False,
                 "reason": "User doesn't exist."
-            }), "application/json")
+            }
 
     try:
         open(f"{SAVING_DIRECTORY}{username}.json", "r")
     except FileNotFoundError:
-        return return_dynamic_content_type(json.dumps({
+        return {
             "valid": False,
             "reason": "User doesn't exist."
-        }), "application/json")
+        }
 
     token = generate_token(username, passhash)
 
     try:
         enforced_username = open(f"{SAVING_DIRECTORY}tokens/{token}.txt", "r").read()
     except FileNotFoundError:
-        return return_dynamic_content_type(json.dumps({
+        return {
             "valid": False,
             "reason": "Invalid password"
-        }), "application/json")
+        }
 
     if enforced_username != username:
-        return return_dynamic_content_type(json.dumps({
+        return {
             "valid": False,
             "reason": "Invalid password"
-        }), "application/json")
+        }
 
-    return return_dynamic_content_type(json.dumps({
+    return {
         "valid": True,
         "token": token
-    }), "application/json")
+    }
 
 def api_account_signup():
     try:
@@ -191,17 +191,17 @@ def api_account_signup():
 
     for i in username:
         if i not in "abcdefghijklmnopqrstuvwxyz0123456789_-":
-            return return_dynamic_content_type(json.dumps({
+            return {
                 "valid": False,
                 "reason": "Username can only contain a-z, 0-9, underscores, and hyphens."
-            }), "application/json")
+            }
 
     try:
         open(f"{SAVING_DIRECTORY}{username}.json", "r")
-        return return_dynamic_content_type(json.dumps({
+        return {
             "valid": False,
             "reason": "Username taken."
-        }), "application/json")
+        }
     except FileNotFoundError:
         pass
 
@@ -280,6 +280,40 @@ def api_account_self():
     except FileNotFoundError:
         flask.abort(404)
 
+def api_account_change():
+    username = open(f'{SAVING_DIRECTORY}tokens/{request.cookies["token"]}.txt', 'r').read()
+    x = json.loads(request.data)
+
+    if generate_token(username, x["current"]) != request.cookies["token"]:
+        flask.abort(401)
+
+    new = generate_token(username, x["new"])
+    os.rename(f'{SAVING_DIRECTORY}tokens/{request.cookies["token"]}.txt', f'{SAVING_DIRECTORY}tokens/{new}.txt')
+
+    return {
+        "token": new
+    }
+
+def api_account_delete():
+    username = open(f'{SAVING_DIRECTORY}tokens/{request.cookies["token"]}.txt', 'r').read()
+    x = json.loads(request.data)
+
+    token = generate_token(username, x["passhash"])
+    if generate_token(username, x["passhash"]) != request.cookies["token"]:
+        flask.abort(401)
+
+    os.remove(f"{SAVING_DIRECTORY}tokens/{token}.txt")
+    os.remove(f"{SAVING_DIRECTORY}{username}.json")
+
+    f = json.loads(open(f"{SAVING_DIRECTORY}public/list.json", "r").read())
+    if username in f:
+        f.remove(username)
+        g = open(f"{SAVING_DIRECTORY}public/list.json", "w")
+        g.write(json.dumps(f))
+        g.close()
+
+    return "200 OK"
+
 def api_save():
     username = open(f'{SAVING_DIRECTORY}tokens/{request.cookies["token"]}.txt', 'r').read()
     x = json.loads(request.data)
@@ -357,9 +391,9 @@ def api_save():
     return "200 OK"
 
 def api_browse():
-    return return_dynamic_content_type(
-        json.dumps(list_public(request.args.get("sort"), int(request.args.get("page")) if "page" in request.args else 0)),
-        "application/json"
+    return list_public(
+        request.args.get("sort"), # type: ignore
+        int(request.args.get("page")) if "page" in request.args else 0 # type: ignore
     )
 
 def home():
@@ -399,6 +433,7 @@ app.route("/login")(create_file_serve("login.html"))
 app.route("/signup")(create_file_serve("signup.html"))
 app.route("/logout")(create_file_serve("logout.html"))
 app.route("/browse")(create_file_serve("browse.html"))
+app.route("/settings")(create_file_serve("settings.html"))
 
 app.route("/editor")(create_file_serve("editor.html"))
 app.route("/u/<path:property>")(create_file_serve("user.html"))
@@ -411,6 +446,8 @@ app.route("/api/account/login", methods=["POST"])(api_account_login)
 app.route("/api/account/signup", methods=["POST"])(api_account_signup)
 app.route("/api/account/info/<path:user>", methods=["GET"])(api_account_info_)
 app.route("/api/account/self", methods=["GET"])(api_account_self)
+app.route("/api/account/change", methods=["POST"])(api_account_change)
+app.route("/api/account/delete", methods=["DELETE"])(api_account_delete)
 app.route("/api/save", methods=["PATCH"])(api_save)
 app.route("/api/browse", methods=["GET"])(api_browse)
 

@@ -42,6 +42,14 @@
       Shortened url:<br>
       https://infopg.web.app/u/{{USERNAME}}
     </div>
+    <div tabindex="5" onclick="window.location.href = '/logout'" class="home-container">
+      <p>Log out</p>
+      You can always log back in
+    </div>
+    <div tabindex="6" onclick="window.location.href = '/settings'" class="home-container">
+      <p>User Settings</p>
+      Change password, delete acc, etc.
+    </div>
 
     <script>
       [...document.querySelectorAll("[onclick][tabindex]")].forEach(function(val, index) {
