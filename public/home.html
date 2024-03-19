@@ -26,17 +26,14 @@
       <p>Edit your profile</p>
       {{DISPL_NAME}} (@{{USERNAME}})<br>
     </div>
-    <br>
     <div tabindex="2" onclick="toggleVisibility()" class="home-container">
       <p>Toggle visibility</p>
       Visibility: <span id="public-thing"></span>Public
     </div>
-    <br>
     <div tabindex="3" onclick="window.location.href = '/browse'" class="home-container">
       <p>Browse other profiles</p>
       Total public profiles: <span id="total">{{TOTAL}}</span>
     </div>
-    <br>
     <div tabindex="4" onclick="window.location.href = '/u/{{USERNAME}}'" class="home-container">
       <p>Preview your profile</p>
       Shortened url:<br>
