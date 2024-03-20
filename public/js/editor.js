@@ -91,7 +91,7 @@ fetch("/api/account/self", {
       <div>Public: <input id="public" type="checkbox" ${json.public ? "checked" : ""}></div><br>
       <a href="/home"><button>Home</button></a>
       <a target="_blank" href="/u/${json.username}"><button>Preview</button></a>
-      <button onclick="navigator.clipboard.writeText('https://infopg.web.app/u/trinkey'); log('Copied!');">Share</button>
+      <button onclick="navigator.clipboard.writeText('https://infopg.web.app/u/${json.username}'); log('Copied!');">Share</button>
       <button id="save">Save</button><div id="log"> </div>
       <div id="word-container">
     `;
