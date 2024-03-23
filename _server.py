@@ -153,6 +153,7 @@ def get_template(json, username):
     return title, inner, styles, embed
 
 def get_user_page(user):
+    user = user.lower()
     x = open(f"{CONTENT_DIRECTORY}user.html", "r").read()
     try:
         user_json = json.loads(open(f"{SAVING_DIRECTORY}{user}.json", "r").read())
