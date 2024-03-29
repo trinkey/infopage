@@ -104,10 +104,10 @@ def validate_color(color: str) -> bool:
 
     return True
 
-def sort_list(l: list[list[str]], alphabetical=True) -> list[list[str]]:
+def sort_list(l: list[list[str]], alphabetical=False) -> list[list[str]]:
     output = []
     for i in l:
-        if i[0] and (not alphabetical and (i[1] in ["1", "2", "3", "4"]) or (alphabetical and i[1])):
+        if i[0] and ((not alphabetical and (i[1] in ["1", "2", "3", "4"]) or (alphabetical and i[1]))):
             output.append(i)
 
     if alphabetical:
@@ -533,7 +533,7 @@ def api_save():
         for i in x["social"]:
             if len(i) == 2 and i[1] in SOCIALS_REGEX and SOCIALS_REGEX[i[1]].match(i[0]):
                 social.append(i)
-        user_data["social"] = sort_list(social)
+        user_data["social"] = sort_list(social, True)
 
     f = open(f"{SAVING_DIRECTORY}{username}.json", "w")
     f.write(json.dumps(user_data))
