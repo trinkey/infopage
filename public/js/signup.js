@@ -15,9 +15,15 @@ dom("toggle-password").addEventListener("click", function() {
 });
 
 dom("submit").addEventListener("click", function() {
-  this.setAttribute("disabled", "");
   username = dom("username").value;
-  password = sha256(dom("password").value)
+  password = sha256(dom("password").value);
+
+  if (sha256(dom("confirm").value) != password) {
+    showlog("Passwords don't match!");
+    return;
+  }
+
+  this.setAttribute("disabled", "");
   fetch("/api/account/signup", {
     method: "POST",
     headers: {

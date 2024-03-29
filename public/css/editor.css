@@ -1,5 +1,21 @@
 input:not([type]), input[type="text"] {
   width: 10em;
+  border: 2px solid #0000;
+}
+
+#social input.bad,
+#social input.bad:focus {
+  border-color: var(--accent);
+  outline-color: var(--accent);
+}
+
+.added.wider input:not([type]),
+.added.wider input[type="text"] {
+  width: 14em;
+}
+
+.wider {
+  max-width: 22em;
 }
 
 #input-display-name {

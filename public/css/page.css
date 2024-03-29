@@ -1,3 +1,7 @@
+body {
+  padding-bottom: calc(20px + 8em);
+}
+
 svg {
   width: 0.9em;
   height: 0.9em;
@@ -5,13 +9,14 @@ svg {
   fill: var(--text);
 }
 
-#word-container {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  justify-content: center;
-  row-gap: 5em;
-  column-gap: 2em;
+a, a:visited, a:link {
+  color: var(--text);
+  text-decoration-color: var(--text);
+}
+
+footer a, footer a:visited, footer a:link {
+  color: var(--accent);
+  text-decoration-color: var(--accent);
 }
 
 .added {
@@ -23,4 +28,39 @@ svg {
 
 .added h2 {
   text-align: center;
+}
+
+.added div {
+  margin-bottom: 0.2em;
+}
+
+#word-container {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  row-gap: 5em;
+  column-gap: 2em;
+}
+
+#key {
+  position: fixed;
+  text-align: left;
+  bottom: 10px;
+  opacity: 50%;
+}
+
+@media screen and (min-width: 566px) {
+  #key {
+    left: 10px;
+  }
+}
+
+@media screen and (max-width: 565px) {
+  #key {
+    position: fixed;
+    text-align: left;
+    bottom: calc(10px + 2em);
+    right: 10px;
+  }
 }

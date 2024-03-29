@@ -1,23 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,700;1,400;1,700&display=swap');
 
-@font-face {
-  font-family: 'FontAwesome Solid';
-  src: url('https://site-assets.fontawesome.com/releases/v6.5.1/webfonts/fa-solid-900.woff2');
-}
-
-@font-face {
-  font-family: 'FontAwesome Solid';
-  src: url('https://site-assets.fontawesome.com/releases/v6.5.1/webfonts/fa-solid-900.woff2');
-}
-
-.fa-s {
-  font-family: 'FontAwesome Solid', sans-serif;
-}
-
-.fa-r {
-  font-family: 'FontAwesome Regular', sans-serif;
-}
-
 :root {
   --text: #aaaaaa;
   --background: #333333;
@@ -42,21 +24,21 @@ body::-webkit-scrollbar { display: none; }
 body {
   background-color: var(--background);
   color: var(--text);
-  font-family: 'Poppins', "FontAwesome Regular", 'Arial';
+  font-family: 'Poppins', 'Arial';
   padding: 5vh 0;
   text-align: center;
-  font-size: 14px;
+  font-size: 16px;
   margin: 0px;
   overflow-x: hidden;
   word-wrap: break-word;
 }
 
 @media screen and (min-width: 1025px) {
-  body { font-size: 16px; }
+  body { font-size: 18px; }
 }
 
 @media screen and (max-width: 565px) {
-  body { font-size: 16px; padding: 5vh 3vw; }
+  body { font-size: 18px; padding: 5vh 3vw; }
 }
 
 button {
@@ -93,6 +75,13 @@ option, select {
 
 option {
   font-size: 1.1em;
+}
+
+footer {
+  opacity: 50%;
+  position: fixed;
+  bottom: 10px;
+  right: 10px;
 }
 
 textarea { background-color: var(--secondary-low-opacity); }

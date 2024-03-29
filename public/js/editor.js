@@ -17,7 +17,7 @@ function addToOutput(starting, json, key, title) {
   for (let i = 0; i < json[key].length; i++) {
     starting += `
     <div id="${key}-${i}" data-id="${i}">
-      <select data-select2>
+      <select>
         <option value="4"${json[key][i][1] == 4 ?" selected" : ""}>great</option>
         <option value="3"${json[key][i][1] == 3 ?" selected" : ""}>good</option>
         <option value="2"${json[key][i][1] == 2 ?" selected" : ""}>fine</option>
@@ -32,7 +32,7 @@ function addToOutput(starting, json, key, title) {
   return starting;
 }
 
-function add_input(key) {
+function add_input(key, override) {
   let x = document.createElement("div")
 
   let q = [...document.querySelectorAll(`#${key} div[id^="${key}-"]`)];
@@ -40,8 +40,8 @@ function add_input(key) {
 
   x.id = `${key}-${i}`;
   x.setAttribute("data-id", i);
-  x.innerHTML = `
-  <select data-select2>
+  x.innerHTML = (override || `
+  <select>
     <option value="4">great</option>
     <option value="3" selected>good</option>
     <option value="2">fine</option>
@@ -49,7 +49,7 @@ function add_input(key) {
   </select>
 
   <input maxlength="48">
-  <svg onclick="dom('${x.id}').remove()">${icons.x}</svg>`;
+  <svg onclick="dom('${x.id}').remove()">${icons.x}</svg>`).replaceAll("%i", i);
 
   dom(key).append(x);
 }
@@ -61,9 +61,23 @@ function updateColors() {
 function get_list(key) {
   let output = [];
   [...document.querySelectorAll(`#${key} div[id^="${key}-"]`)].forEach((val, index) => {
-    output.push([val.querySelector("input").value, val.querySelector("select").value]);
+    if (!val.classList.contains("bad")) {
+      output.push([val.querySelector("input").value, val.querySelector("select").value]);
+    }
   });
   return output;
+}
+
+function validate_input(el) {
+  el = document.querySelector(`#${el.dataset.id} input`);
+  platform = document.querySelector(`#${el.dataset.id} select`).value;
+  value = el.value;
+
+  if (socialRegex[platform].regex.test(value)) {
+    el.classList.remove("bad");
+  } else {
+    el.classList.add("bad");
+  }
 }
 
 if (localStorage.getItem("token")) {
@@ -73,6 +87,12 @@ if (localStorage.getItem("token")) {
 }
 
 let colors, c;
+
+let socialInput = "<select onchange=\"validate_input(this);\" data-id=\"social-%i\">";
+for (const key of Object.keys(socialRegex)) {
+  socialInput += `<option value="${key}">${socialRegex[key].name}</option>`;
+}
+socialInput += `</select><input class="bad" oninput="validate_input(this);" data-id="social-%i"></div><svg onclick="dom('social-%i').remove()">${icons.x}</svg>`;
 
 fetch("/api/account/self", {
   "method": "GET"
@@ -102,7 +122,14 @@ fetch("/api/account/self", {
     inner = addToOutput(inner, json, "compliments", "Compliments");
     inner = addToOutput(inner, json, "relationship", "Relationship<br>Descriptions");
 
-    inner += "</div>";
+    inner += `<div class="added wider" style="text-align: center;"><div style="text-align: left; margin-bottom: 10px;" id='social'><h2>Social Links</h2>`
+    let i = 0;
+    for (const link of (json.social || [])) {
+      inner += `<div id="social-${i}" data-id="${i}">${socialInput.split("</select")[0].replaceAll("%i", i).replace(`value="${link[1]}"`, `selected value="${link[1]}"`)}</select><input value="${escapeHTML(link[0], true)}" oninput="validate_input(this);" data-id="social-${i}"><svg onclick="dom('social-${i}').remove()">${icons.x}</svg></div>`;
+      i++;
+    }
+
+    inner += `</div><button onclick="add_input('social', '${socialInput.replaceAll("\"", "&quot;").replaceAll("\'", "\\\'")}');">Add</button></div></div>`;
 
     x.id = "container";
     x.innerHTML = inner;
@@ -129,6 +156,7 @@ fetch("/api/account/self", {
           honorifics: get_list("honorifics"),
           compliments: get_list("compliments"),
           relationship: get_list("relationship"),
+          social: get_list("social"),
           public: dom("public").checked
         })
       }).then((response) => (response.text()))
@@ -160,5 +188,5 @@ fetch("/api/account/self", {
     });
   })
   .catch((err) => {
-    window.location.href = "/logout";
+    document.body.innerHTML = `Something went wrong loading the page! Maybe try reloading?<br>Error: ${err}`;
   });
