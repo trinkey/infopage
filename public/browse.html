@@ -22,7 +22,7 @@
 
       function load(fromStart) {
         if (fromStart) { next = 0; }
-        fetch(`/api/browse?sort=alphabetical&page=${next}`, {
+        fetch(`/api/browse?sort=random&page=${next}`, {
           "method": "GET"
         }).then((request) => (request.json()))
           .then((json) => {

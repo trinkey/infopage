@@ -58,11 +58,11 @@ function updateColors() {
   document.body.setAttribute("style", `--primary: ${colors.text}; --secondary-low-opacity: ${colors.text}22; --background: ${colors.background}; --background-low-opacity: ${colors.background}33; --accent: ${colors.accent}; --accent-low-opacity: ${colors.accent}66; --text: ${colors.text}; --text-low-opacity: ${colors.text}88;`);
 }
 
-function get_list(key) {
+function get_list(key, hasInput=true) {
   let output = [];
   [...document.querySelectorAll(`#${key} div[id^="${key}-"]`)].forEach((val, index) => {
     if (!val.classList.contains("bad")) {
-      output.push([val.querySelector("input").value, val.querySelector("select").value]);
+      output.push(hasInput ? [val.querySelector("input").value, val.querySelector("select").value] : val.querySelector("select").value);
     }
   });
   return output;
@@ -93,6 +93,12 @@ for (const key of Object.keys(socialRegex)) {
   socialInput += `<option value="${key}">${socialRegex[key].name}</option>`;
 }
 socialInput += `</select><input class="bad" oninput="validate_input(this);" data-id="social-%i"></div><svg onclick="dom('social-%i').remove()">${icons.x}</svg>`;
+
+let flagInput = "<select data-id=\"flags-%i\">";
+for (const key of Object.keys(flags)) {
+  flagInput += `<option value="${key}">${flags[key]}</option>`
+}
+flagInput += `</select><svg onclick="dom('flags-%i').remove()">${icons.x}</svg>`
 
 fetch("/api/account/self", {
   "method": "GET"
@@ -129,7 +135,15 @@ fetch("/api/account/self", {
       i++;
     }
 
-    inner += `</div><button onclick="add_input('social', '${socialInput.replaceAll("\"", "&quot;").replaceAll("\'", "\\\'")}');">Add</button></div></div>`;
+    inner += `</div><button onclick="add_input('social', '${socialInput.replaceAll("\"", "&quot;").replaceAll("\'", "\\\'")}');">Add</button></div></div>
+              <div class="added" style="text-align: center;"><div style="text-align: left; margin-bottom: 10px;" id='flags'><h2>Pride Flags</h2>`;
+
+    i = 0;
+    for (const flag of (json.flags || [])) {
+      inner += `<div id="social-${i}" data-id="${i}">${flagInput.split("</select")[0].replaceAll("%i", i).replace(`value="${flag}"`, `selected value="${flag}"`)}</select><svg onclick="dom('social-${i}').remove()">${icons.x}</svg></div>`;
+      i++;
+    }
+    inner += `</div><button onclick="add_input('flags', '${flagInput.replaceAll("\"", "&quot;").replaceAll("\'", "\\\'")}');">Add</button></div></div>`
 
     x.id = "container";
     x.innerHTML = inner;
@@ -157,6 +171,7 @@ fetch("/api/account/self", {
           compliments: get_list("compliments"),
           relationship: get_list("relationship"),
           social: get_list("social"),
+          flags: get_list("flags", false),
           public: dom("public").checked
         })
       }).then((response) => (response.text()))

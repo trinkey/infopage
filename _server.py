@@ -1,3 +1,6 @@
+# MAKE SURE YOU INSTALL ALL NEEDED LIBRARIES!
+# pip install flask dotindex ensure-file
+
 CONTENT_DIRECTORY = "./public/"
 SAVING_DIRECTORY = "./save/"
 
@@ -12,12 +15,43 @@ import os
 import re
 
 from DotIndex import DotIndex
+from ensure_file import ensure_file
 from typing import Union, Callable
 from flask import request, redirect
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 app = flask.Flask(__name__)
 app.url_map.strict_slashes = False
+
+FLAGS = {
+  "agender": "Agender",
+  "ally": "Ally",
+  "aroace": "Aroace",
+  "aro": "Aromantic",
+  "ace": "Asexual",
+  "bicurious": "Bicurious",
+  "bigender": "Bigender",
+  "bi": "Bisexual",
+  "cisgender": "Cisgender",
+  "demiboy": "Demiboy",
+  "demigirl": "Demigirl",
+  "demiromantic": "Demiromantic",
+  "demisexual": "Demisexual",
+  "gay": "Gay (Rainbow)",
+  "gayman": "Gay Man",
+  "genderfluid": "Genderfluid",
+  "intersex": "Intersex",
+  "lesbian": "Lesbian",
+  "nonbinary": "Nonbinary",
+  "omnigender": "Omnigender",
+  "pan": "Pansexual",
+  "polyamory": "Polyamorous",
+  "straight": "Straight",
+  "transfem": "Transfeminine",
+  "trans": "Transgender",
+  "transmasc": "Transmasculine"
+}
+
 
 SOCIALS_REGEX = {
   "discord"   : re.compile(r"^(?!.*\.\.)(?=.{2,32}$)[a-z0-9_.]+$"),
@@ -126,24 +160,6 @@ def sha(string: Union[str, bytes]) -> str:
         return hashlib.sha256(string).hexdigest()
     return ""
 
-def ensure_file(path: str, *, default_value: str="", folder: bool=False) -> None:
-    if os.path.exists(path):
-        if folder and not os.path.isdir(path):
-            os.remove(path)
-            os.makedirs(path)
-        elif not folder and os.path.isdir(path):
-            shutil.rmtree(path, ignore_errors=True)
-            f = open(path, "w")
-            f.write(default_value)
-            f.close()
-    else:
-        if folder:
-            os.makedirs(path)
-        else:
-            f = open(path, "w")
-            f.write(default_value)
-            f.close()
-
 def escape_html(string: str) -> str:
     return string.replace("&", "&amp;").replace("<", "&lt;").replace("\"", "&quot;")
 
@@ -226,11 +242,10 @@ def get_template(json, username):
     inner = add_to_output(inner, json, "compliments", "Compliments");
     inner = add_to_output(inner, json, "relationship", "Relationship<br>Descriptions");
 
-    try:
-        social = json.social # type: ignore
+    if "social" in json and len(json.social):
         inner += '<div class="added" id="social"><h2>Social Links</h2>'
 
-        for i in social:
+        for i in json.social:
             if SOCIAL_INFO[i[1]]["link"]:
                 inner += f"<div>{SOCIAL_ICONS[i[1]]} <a href='{SOCIAL_INFO[i[1]]['link'].replace('%q', i[0])}' target='_blank'>{SOCIAL_INFO[i[1]]['prefix']}{escape_html(i[0])}</a></div>"
             else:
@@ -238,10 +253,15 @@ def get_template(json, username):
 
         inner += "</div>"
 
-    except AttributeError as e:
-        print(e)
+    if "flags" in json and len(json.flags):
+        inner += '<div class="added" id="flags"><h2>Pride Flags</h2><div class="img-list">'
 
-    inner += "</div>"
+        for i in json.flags:
+            inner += f'<img src="/img/flags/{i}.png" title="{FLAGS[i]}">'
+
+        inner += "</div></div>"
+
+    inner += f'</div><div id="key">Key:<br>{icons["4"]} - Great<br>{icons["3"]} - Good<br>{icons["2"]} - Okay<br>{icons["1"]} - Bad</div><footer>Icons from <a href="https://fontawesome.com" target="_blank">Font Awesome</a></footer>'
 
     return title, inner, styles, embed
 
@@ -535,6 +555,13 @@ def api_save():
                 social.append(i)
         user_data["social"] = sort_list(social, True)
 
+    if "flags" in x:
+        flags = {}
+        for i in x["flags"]:
+            if i in FLAGS:
+                flags[i] = None
+        user_data["flags"] = sorted([i for i in flags])
+
     f = open(f"{SAVING_DIRECTORY}{username}.json", "w")
     f.write(json.dumps(user_data))
     f.close()
@@ -590,8 +617,9 @@ app.route("/editor")(create_file_serve("editor.html"))
 app.route("/u/<path:user>")(get_user_page)
 app.route("/home")(home)
 
-app.route("/js/<path:file>")(create_folder_serve("js"))
 app.route("/css/<path:file>")(create_folder_serve("css"))
+app.route("/img/flags/<path:file>")(create_folder_serve("img/flags"))
+app.route("/js/<path:file>")(create_folder_serve("js"))
 
 app.route("/api/account/login", methods=["POST"])(api_account_login)
 app.route("/api/account/signup", methods=["POST"])(api_account_signup)

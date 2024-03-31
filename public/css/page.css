@@ -1,5 +1,5 @@
 body {
-  padding-bottom: calc(20px + 8em);
+  padding-bottom: calc(30px + 8em);
 }
 
 svg {
@@ -24,6 +24,19 @@ footer a, footer a:visited, footer a:link {
   text-align: left;
   max-width: 16em;
   white-space: break-word;
+}
+
+.added .img-list {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  column-gap: 0.5em;
+  max-width: 10em;
+}
+
+.added img {
+  max-width: 4em;
 }
 
 .added h2 {

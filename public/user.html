@@ -12,23 +12,5 @@
 
   <body>
     {{TEMPLATE}}
-
-    <div id="key">
-      Key:<br>
-      <span data-icon="4"></span> - Great<br>
-      <span data-icon="3"></span> - Good<br>
-      <span data-icon="2"></span> - Okay<br>
-      <span data-icon="1"></span> - Bad
-    </div>
-
-    <footer>
-      Icons from <a href="https://fontawesome.com" target="_blank">Font Awesome</a>
-    </footer>
-
-    <script>
-      [...document.querySelectorAll("[data-icon]")].forEach(function(val, index) {
-        val.innerHTML = icons[val.dataset.icon];
-      })
-    </script>
   </body>
 </html>
