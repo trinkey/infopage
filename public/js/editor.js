@@ -135,7 +135,7 @@ fetch("/api/account/self", {
       i++;
     }
 
-    inner += `</div><button onclick="add_input('social', '${socialInput.replaceAll("\"", "&quot;").replaceAll("\'", "\\\'")}');">Add</button></div></div>
+    inner += `</div><button onclick="add_input('social', '${socialInput.replaceAll("\"", "&quot;").replaceAll("\'", "\\\'")}');">Add</button></div>
               <div class="added" style="text-align: center;"><div style="text-align: left; margin-bottom: 10px;" id='flags'><h2>Pride Flags</h2>`;
 
     i = 0;
