@@ -140,7 +140,7 @@ fetch("/api/account/self", {
 
     i = 0;
     for (const flag of (json.flags || [])) {
-      inner += `<div id="social-${i}" data-id="${i}">${flagInput.split("</select")[0].replaceAll("%i", i).replace(`value="${flag}"`, `selected value="${flag}"`)}</select><svg onclick="dom('social-${i}').remove()">${icons.x}</svg></div>`;
+      inner += `<div id="flags-${i}" data-id="${i}">${flagInput.split("</select")[0].replaceAll("%i", i).replace(`value="${flag}"`, `selected value="${flag}"`)}</select><svg onclick="dom('flags-${i}').remove()">${icons.x}</svg></div>`;
       i++;
     }
     inner += `</div><button onclick="add_input('flags', '${flagInput.replaceAll("\"", "&quot;").replaceAll("\'", "\\\'")}');">Add</button></div></div>`
