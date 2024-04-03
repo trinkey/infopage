@@ -4,4 +4,4 @@ or https://infopg.web.app
 it's like pronouns.page but i made it
 
 ### todo
-* pride flags
+* custom sections
